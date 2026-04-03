@@ -1,0 +1,24 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$autoloadPaths = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+];
+
+foreach ($autoloadPaths as $autoload) {
+    if (file_exists($autoload)) {
+        require $autoload;
+        break;
+    }
+}
+
+use AgenceNous\GitlabTemplates\Command\InstallCommand;
+use Symfony\Component\Console\Application;
+
+$app = new Application('gitlab-templates', '1.0.0');
+$app->add(new InstallCommand());
+$app->setDefaultCommand('install', true);
+$app->run();
