@@ -1,0 +1,22 @@
+{
+    "name": "agencenous/gitlab-templates",
+    "description": "Install GitLab issue templates from a local directory or a remote repository.",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "keywords": ["gitlab", "templates", "issues"],
+    "autoload": {
+        "psr-4": {
+            "AgenceNous\\GitlabTemplates\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.1",
+        "symfony/console": "^6.0 || ^7.0"
+    },
+    "bin": [
+        "bin/gitlab-templates"
+    ],
+    "config": {
+        "sort-packages": true
+    }
+}
