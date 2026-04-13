@@ -2,6 +2,11 @@
 
 Tool for creating/syncing issue templates in git projects
 
+**Version: 1.0.0**
+
+Available templates:
+- **Default.md**: Template for a feature request (use case, technical description, impacted modules, points of concern, estimations).
+- **Incident.md**: Template for a bug
 
 ## Install
 
@@ -96,11 +101,6 @@ Via composer.json
 | `--project-dir` | `-d` | Root path of the project (default : current directory) |
 | `--repository-type` | `-r` | Repository type to use (default : `extra.git-templates-repository-type`, then `REPOSITORY_TYPE`, then `gitlab`) |
 | `--locale` | `-l` | Locale to use (default : `extra.git-templates-locale`, then `LANGUAGE`, then `en_US`) |
-
-## Available templates
-
-- **Default.md**: Template for a feature request (use case, technical description, impacted modules, points of concern, estimations).
-- **Incident.md**: Template for a bug
 
 ## Licence
 
