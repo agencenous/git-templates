@@ -15,7 +15,7 @@ foreach ($autoloadPaths as $autoload) {
     }
 }
 
-use AgenceNous\GitlabTemplates\Command\InstallCommand;
+use AgenceNous\GitTemplates\Command\InstallCommand;
 use Symfony\Component\Console\Application;
 
 $app = new Application('gitlab-templates', '1.0.0');

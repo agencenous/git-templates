@@ -1,4 +1,4 @@
-# GitLab Templates
+# Git Templates
 
 Outil CLI pour installer des templates d'issues GitLab standardises dans vos projets.
 
@@ -30,10 +30,10 @@ Locales disponibles : `fr_FR`, `en_US`.
 
 ```bash
 # Templates en francais
-vendor/bin/gitlab-templates -l fr_FR
+vendor/bin/git-templates -l fr_FR
 
 # Via variable d'environnement
-LANGUAGE=fr_FR vendor/bin/gitlab-templates
+LANGUAGE=fr_FR vendor/bin/git-templates
 ```
 
 ### Options

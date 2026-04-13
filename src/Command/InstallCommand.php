@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AgenceNous\GitlabTemplates\Command;
+namespace AgenceNous\GitTemplates\Command;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
