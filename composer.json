@@ -1,7 +1,8 @@
 {
     "name": "agencenous/git-templates",
+    "version": "0.0.1",
     "description": "Install GitLab issue templates from a local directory or a remote repository.",
-    "type": "library",
+    "type": "composer-plugin",
     "license": "GPL-3.0-or-later",
     "minimum-stability": "dev",
     "keywords": ["git", "gitlab", "templates", "issues"],
@@ -12,15 +13,19 @@
     },
     "require": {
         "php": ">=8.1",
-        "symfony/console": "^6.0 || ^7.0"
+        "composer-plugin-api": "^2.0",
+        "symfony/console": "^6.0 || ^7.0",
+        "symfony/process": "^6.0 || ^7.0"
+    },
+    "require-dev": {
+        "composer/composer": "^2.0"
+    },
+    "extra": {
+        "class": "AgenceNous\\GitTemplates\\ComposerPlugin"
     },
     "bin": [
         "bin/git-templates"
     ],
-    "scripts": {
-        "post-install-cmd": "php bin/git-templates",
-        "post-update-cmd": "php bin/git-templates"
-    },
     "config": {
         "sort-packages": true
     }
