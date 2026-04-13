@@ -1,51 +1,66 @@
 # Git Templates
 
-Outil CLI pour installer des templates d'issues GitLab standardises dans vos projets.
+Tool for creating/syncing issue templates in git projects
+
 
 ## Installation
 
 ```bash
-composer require agencenous/git-templates
+composer require agencenous/git-templates --dev
 ```
 
 ## Utilisation
 
-Depuis la racine de votre projet :
+From the project root:
 
 ```bash
 vendor/bin/gitlab-templates
 ```
 
-Les templates sont copies dans `.gitlab/issue_templates/`.
+Templates are createed in `.gitlab/issue_templates/`.
 
 ### Locale
 
-La locale est resolue dans cet ordre :
+The locale is defined in this order:
 
 1. Option `--locale` / `-l`
-2. Variable d'environnement `LANGUAGE`
-3. Par defaut : `en_US`
+2. `composer.json` key `extra.git-templates-locale`
+3. Environment variable `LANGUAGE`
+4. Default : `en_US`
 
-Locales disponibles : `fr_FR`, `en_US`.
+Available locales: `fr_FR`, `en_US`.
 
+**Examples**
+
+Command line:
 ```bash
-# Templates en francais
 vendor/bin/git-templates -l fr_FR
+```
 
-# Via variable d'environnement
+Via environment variable
+```bash
 LANGUAGE=fr_FR vendor/bin/git-templates
+```
+
+Via composer.json
+```json
+{
+   "extra": {
+     "git-templates-locale": "fr_FR"
+   }
+}
 ```
 
 ### Options
 
 | Option | Alias | Description |
 |---|---|---|
-| `--project-dir` | `-d` | Chemin racine du projet cible (par defaut : repertoire courant) |
-| `--locale` | `-l` | Locale a utiliser (par defaut : variable `LANGUAGE`, puis `en_US`) |
+| `--project-dir` | `-d` | Root path of the project (default : current directory) |
+| `--locale` | `-l` | Locale to use (default : `extra.git-templates-locale`, then `LANGUAGE`, then `en_US`) |
 
-## Templates inclus
+## Available templates
 
-- **Default.md** : Template de feature request structure (cas d'utilisation, description technique, modules concernes, points de vigilance, estimations).
+- **Default.md** : Template for a feature request (use case, technical description, impacted modules, points of concern, estimations).
 
 ## Licence
 
