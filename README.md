@@ -99,7 +99,8 @@ Via composer.json
 
 ## Available templates
 
-- **Default.md** : Template for a feature request (use case, technical description, impacted modules, points of concern, estimations).
+- **Default.md**: Template for a feature request (use case, technical description, impacted modules, points of concern, estimations).
+- **Incident.md**: Template for a bug
 
 ## Licence
 
