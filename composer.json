@@ -16,6 +16,10 @@
     "bin": [
         "bin/git-templates"
     ],
+    "scripts": {
+        "post-install-cmd": "php bin/git-templates",
+        "post-update-cmd": "php bin/git-templates"
+    },
     "config": {
         "sort-packages": true
     }
