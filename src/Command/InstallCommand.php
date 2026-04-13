@@ -18,6 +18,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class InstallCommand extends Command
 {
     private const TEMPLATES_DIR = '.gitlab/issue_templates';
+    private const COMPOSER_FILE = 'composer.json';
+    private const COMPOSER_EXTRA_LOCALE_KEY = 'git-templates-locale';
     private const AVAILABLE_LOCALES = ['fr_FR', 'en_US'];
     private const DEFAULT_LOCALE = 'en_US';
 
@@ -35,7 +37,7 @@ class InstallCommand extends Command
                 'locale',
                 'l',
                 InputOption::VALUE_REQUIRED,
-                'Locale to use (e.g. fr_FR, en_US). Defaults to LANGUAGE env variable.',
+                'Locale to use (e.g. fr_FR, en_US). Defaults to composer extra git-templates-locale, then LANGUAGE env variable.',
             );
     }
 
@@ -44,7 +46,8 @@ class InstallCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $projectDir = rtrim($input->getOption('project-dir'), '/');
         $targetDir = $projectDir . '/' . self::TEMPLATES_DIR;
-        $locale = $this->resolveLocale($input->getOption('locale'));
+        $localeFromComposerExtra = $this->resolveLocaleFromComposerExtra($projectDir);
+        $locale = $this->resolveLocale($input->getOption('locale'), $localeFromComposerExtra);
         $resourcesDir = dirname(__DIR__, 2) . '/resources/templates/' . $locale;
 
         $io->text(sprintf('<info>✓</info> Locale: %s', $locale));
@@ -66,15 +69,59 @@ class InstallCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function resolveLocale(?string $option): string
+    private function resolveLocale(?string $option, ?string $composerExtraLocale): string
     {
-        $locale = $option ?? getenv('LANGUAGE') ?: self::DEFAULT_LOCALE;
+        $locale = $option ?? $composerExtraLocale ?? getenv('LANGUAGE') ?: self::DEFAULT_LOCALE;
+
+        return $this->normalizeLocale($locale);
+    }
+
+    private function resolveLocaleFromComposerExtra(string $projectDir): ?string
+    {
+        $composerPath = $projectDir . '/' . self::COMPOSER_FILE;
+
+        if (!is_file($composerPath)) {
+            return null;
+        }
+
+        $composerContent = file_get_contents($composerPath);
+
+        if (!is_string($composerContent)) {
+            return null;
+        }
+
+        try {
+            $composerData = json_decode($composerContent, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return null;
+        }
+
+        if (!is_array($composerData)) {
+            return null;
+        }
+
+        $extra = $composerData['extra'] ?? null;
+
+        if (!is_array($extra)) {
+            return null;
+        }
+
+        $locale = $extra[self::COMPOSER_EXTRA_LOCALE_KEY] ?? null;
+
+        if (!is_string($locale) || $locale === '') {
+            return null;
+        }
+
+        return $locale;
+    }
+
+    private function normalizeLocale(string $locale): string
+    {
+        $normalizedLocale = strtok($locale, '.:');
 
         // Handle values like "fr_FR.UTF-8" or "fr_FR:en"
-        $locale = strtok($locale, '.:');
-
-        if (in_array($locale, self::AVAILABLE_LOCALES, true)) {
-            return $locale;
+        if (is_string($normalizedLocale) && in_array($normalizedLocale, self::AVAILABLE_LOCALES, true)) {
+            return $normalizedLocale;
         }
 
         return self::DEFAULT_LOCALE;
