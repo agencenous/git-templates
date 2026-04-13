@@ -19,6 +19,44 @@ vendor/bin/gitlab-templates
 
 Templates are createed in `.gitlab/issue_templates/`.
 
+### Repository Type
+
+The repository type is defined in this order:
+
+1. Option `--repository-type` / `-r`
+2. `composer.json` key `extra.git-templates-repository-type`
+3. Environment variable `REPOSITORY_TYPE`
+4. Default : `gitlab`
+
+Available repository types: `gitlab`, `github`, `gitbucket`.
+
+Template destination by repository type:
+
+- `gitlab` -> `.gitlab/issue_templates`
+- `github` -> `.github/ISSUE_TEMPLATE`
+- `gitbucket` -> `.gitbucket/issue_templates`
+
+**Examples**
+
+Command line:
+```bash
+vendor/bin/git-templates -r github
+```
+
+Via environment variable
+```bash
+REPOSITORY_TYPE=gitbucket vendor/bin/git-templates
+```
+
+Via composer.json
+```json
+{
+   "extra": {
+     "git-templates-repository-type": "gitlab"
+   }
+}
+```
+
 ### Locale
 
 The locale is defined in this order:
@@ -56,6 +94,7 @@ Via composer.json
 | Option | Alias | Description |
 |---|---|---|
 | `--project-dir` | `-d` | Root path of the project (default : current directory) |
+| `--repository-type` | `-r` | Repository type to use (default : `extra.git-templates-repository-type`, then `REPOSITORY_TYPE`, then `gitlab`) |
 | `--locale` | `-l` | Locale to use (default : `extra.git-templates-locale`, then `LANGUAGE`, then `en_US`) |
 
 ## Available templates

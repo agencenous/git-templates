@@ -17,9 +17,19 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class InstallCommand extends Command
 {
-    private const TEMPLATES_DIR = '.gitlab/issue_templates';
     private const COMPOSER_FILE = 'composer.json';
     private const COMPOSER_EXTRA_LOCALE_KEY = 'git-templates-locale';
+    private const COMPOSER_EXTRA_REPOSITORY_TYPE_KEY = 'git-templates-repository-type';
+    private const REPOSITORY_TYPE_ENV = 'REPOSITORY_TYPE';
+
+    private const AVAILABLE_REPOSITORY_TYPES = ['gitlab', 'github', 'gitbucket'];
+    private const DEFAULT_REPOSITORY_TYPE = 'gitlab';
+    private const TEMPLATES_DIR_BY_REPOSITORY_TYPE = [
+        'gitlab' => '.gitlab/issue_templates',
+        'github' => '.github/ISSUE_TEMPLATE',
+        'gitbucket' => '.gitbucket/issue_templates',
+    ];
+
     private const AVAILABLE_LOCALES = ['fr_FR', 'en_US'];
     private const DEFAULT_LOCALE = 'en_US';
 
@@ -38,6 +48,12 @@ class InstallCommand extends Command
                 'l',
                 InputOption::VALUE_REQUIRED,
                 'Locale to use (e.g. fr_FR, en_US). Defaults to composer extra git-templates-locale, then LANGUAGE env variable.',
+            )
+            ->addOption(
+                'repository-type',
+                'r',
+                InputOption::VALUE_REQUIRED,
+                'Repository type to use (gitlab, github, gitbucket). Defaults to composer extra git-templates-repository-type, then REPOSITORY_TYPE env variable.',
             );
     }
 
@@ -45,16 +61,26 @@ class InstallCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $projectDir = rtrim($input->getOption('project-dir'), '/');
-        $targetDir = $projectDir . '/' . self::TEMPLATES_DIR;
+
+        $repositoryTypeFromComposerExtra = $this->resolveRepositoryTypeFromComposerExtra($projectDir);
+        $repositoryType = $this->resolveRepositoryType(
+            $input->getOption('repository-type'),
+            $repositoryTypeFromComposerExtra,
+        );
+
+        $templatesDir = self::TEMPLATES_DIR_BY_REPOSITORY_TYPE[$repositoryType];
+        $targetDir = $projectDir . '/' . $templatesDir;
+
         $localeFromComposerExtra = $this->resolveLocaleFromComposerExtra($projectDir);
         $locale = $this->resolveLocale($input->getOption('locale'), $localeFromComposerExtra);
         $resourcesDir = dirname(__DIR__, 2) . '/resources/templates/' . $locale;
 
+        $io->text(sprintf('<info>✓</info> Repository type: %s', $repositoryType));
         $io->text(sprintf('<info>✓</info> Locale: %s', $locale));
 
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
-            $io->text(sprintf('<info>✓</info> Directory created: %s', self::TEMPLATES_DIR));
+            $io->text(sprintf('<info>✓</info> Directory created: %s', $templatesDir));
         }
 
         foreach (glob($resourcesDir . '/*.md') as $templatePath) {
@@ -115,6 +141,55 @@ class InstallCommand extends Command
         return $locale;
     }
 
+    private function resolveRepositoryType(?string $option, ?string $composerExtraRepositoryType): string
+    {
+        $repositoryType = $option
+            ?? $composerExtraRepositoryType
+            ?? getenv(self::REPOSITORY_TYPE_ENV)
+            ?: self::DEFAULT_REPOSITORY_TYPE;
+
+        return $this->normalizeRepositoryType($repositoryType);
+    }
+
+    private function resolveRepositoryTypeFromComposerExtra(string $projectDir): ?string
+    {
+        $composerPath = $projectDir . '/' . self::COMPOSER_FILE;
+
+        if (!is_file($composerPath)) {
+            return null;
+        }
+
+        $composerContent = file_get_contents($composerPath);
+
+        if (!is_string($composerContent)) {
+            return null;
+        }
+
+        try {
+            $composerData = json_decode($composerContent, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return null;
+        }
+
+        if (!is_array($composerData)) {
+            return null;
+        }
+
+        $extra = $composerData['extra'] ?? null;
+
+        if (!is_array($extra)) {
+            return null;
+        }
+
+        $repositoryType = $extra[self::COMPOSER_EXTRA_REPOSITORY_TYPE_KEY] ?? null;
+
+        if (!is_string($repositoryType) || $repositoryType === '') {
+            return null;
+        }
+
+        return $repositoryType;
+    }
+
     private function normalizeLocale(string $locale): string
     {
         $normalizedLocale = strtok($locale, '.:');
@@ -125,5 +200,16 @@ class InstallCommand extends Command
         }
 
         return self::DEFAULT_LOCALE;
+    }
+
+    private function normalizeRepositoryType(string $repositoryType): string
+    {
+        $normalizedRepositoryType = strtolower(trim($repositoryType));
+
+        if (in_array($normalizedRepositoryType, self::AVAILABLE_REPOSITORY_TYPES, true)) {
+            return $normalizedRepositoryType;
+        }
+
+        return self::DEFAULT_REPOSITORY_TYPE;
     }
 }
