@@ -18,17 +18,30 @@ vendor/bin/gitlab-templates
 
 Les templates sont copies dans `.gitlab/issue_templates/`.
 
+### Locale
+
+La locale est resolue dans cet ordre :
+
+1. Option `--locale` / `-l`
+2. Variable d'environnement `LANGUAGE`
+3. Par defaut : `en_US`
+
+Locales disponibles : `fr_FR`, `en_US`.
+
+```bash
+# Templates en francais
+vendor/bin/gitlab-templates -l fr_FR
+
+# Via variable d'environnement
+LANGUAGE=fr_FR vendor/bin/gitlab-templates
+```
+
 ### Options
 
 | Option | Alias | Description |
 |---|---|---|
 | `--project-dir` | `-d` | Chemin racine du projet cible (par defaut : repertoire courant) |
-
-Exemple avec un chemin personnalise :
-
-```bash
-vendor/bin/gitlab-templates -d /chemin/vers/mon-projet
-```
+| `--locale` | `-l` | Locale a utiliser (par defaut : variable `LANGUAGE`, puis `en_US`) |
 
 ## Templates inclus
 
