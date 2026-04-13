@@ -5,7 +5,7 @@ Outil CLI pour installer des templates d'issues GitLab standardises dans vos pro
 ## Installation
 
 ```bash
-composer require agencenous/gitlab-templates
+composer require agencenous/git-templates
 ```
 
 ## Utilisation
