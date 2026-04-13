@@ -3,13 +3,13 @@
 Tool for creating/syncing issue templates in git projects
 
 
-## Installation
+## Install
 
 ```bash
 composer require agencenous/git-templates --dev
 ```
 
-## Utilisation
+## Usage
 
 From the project root:
 
