@@ -36,7 +36,7 @@ class ComposerPlugin implements PluginInterface, EventSubscriberInterface
     public function installTemplates(Event $event): void
     {
         $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
-        $binScript = dirname($vendorDir) . '/vendor/agencenous/git-templates/bin/git-templates';
+        $binScript = rtrim($vendorDir, '/') . '/agencenous/git-templates/bin/git-templates';
 
         if (!file_exists($binScript)) {
             return;
@@ -45,8 +45,8 @@ class ComposerPlugin implements PluginInterface, EventSubscriberInterface
         $event->getIO()->write('<info>agencenous/git-templates:</info> Installing GitLab issue templates...');
 
         $process = new \Symfony\Component\Process\Process(
-            ['php', $binScript, '--project-dir=' . dirname($vendorDir)],
-            dirname($vendorDir),
+            ['php', $binScript],
+            getcwd(),
         );
         $process->run(function (string $type, string $buffer) use ($event): void {
             $event->getIO()->write($buffer, false);
