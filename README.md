@@ -2,7 +2,7 @@
 
 Tool for creating/syncing issue templates in git projects
 
-**Version: 1.0.0**
+**Version: 1.1.0**
 
 Available templates:
 - **Default.md**: Template for a feature request (use case, technical description, impacted modules, points of concern, estimations).
@@ -32,6 +32,15 @@ The target project directory is defined in this order:
 2. `composer.json` key `extra.git-templates-project-dir`
 3. Environment variable `PROJECT_DIR`
 4. Default : current directory
+
+Via composer.json
+```json
+{
+   "extra": {
+     "git-templates-project-dir": "subdir"
+   }
+}
+```
 
 ### Repository Type
 
