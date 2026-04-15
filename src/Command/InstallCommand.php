@@ -18,8 +18,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class InstallCommand extends Command
 {
     private const COMPOSER_FILE = 'composer.json';
+    private const COMPOSER_EXTRA_PROJECT_DIR_KEY = 'git-templates-project-dir';
     private const COMPOSER_EXTRA_LOCALE_KEY = 'git-templates-locale';
     private const COMPOSER_EXTRA_REPOSITORY_TYPE_KEY = 'git-templates-repository-type';
+    private const PROJECT_DIR_ENV = 'PROJECT_DIR';
     private const REPOSITORY_TYPE_ENV = 'REPOSITORY_TYPE';
 
     private const AVAILABLE_REPOSITORY_TYPES = ['gitlab', 'github', 'gitbucket'];
@@ -40,8 +42,7 @@ class InstallCommand extends Command
                 'project-dir',
                 'd',
                 InputOption::VALUE_REQUIRED,
-                'Target project root path.',
-                getcwd(),
+                'Target project root path. Defaults to composer extra git-templates-project-dir, then PROJECT_DIR env variable.',
             )
             ->addOption(
                 'locale',
@@ -60,7 +61,8 @@ class InstallCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $projectDir = rtrim($input->getOption('project-dir'), '/');
+        $projectDirFromComposerExtra = $this->resolveProjectDirFromComposerExtra(getcwd());
+        $projectDir = $this->resolveProjectDir($input->getOption('project-dir'), $projectDirFromComposerExtra);
 
         $repositoryTypeFromComposerExtra = $this->resolveRepositoryTypeFromComposerExtra($projectDir);
         $repositoryType = $this->resolveRepositoryType(
@@ -75,6 +77,7 @@ class InstallCommand extends Command
         $locale = $this->resolveLocale($input->getOption('locale'), $localeFromComposerExtra);
         $resourcesDir = dirname(__DIR__, 2) . '/resources/templates/' . $locale;
 
+        $io->text(sprintf('<info>✓</info> Project dir: %s', $projectDir));
         $io->text(sprintf('<info>✓</info> Repository type: %s', $repositoryType));
         $io->text(sprintf('<info>✓</info> Locale: %s', $locale));
 
@@ -93,6 +96,59 @@ class InstallCommand extends Command
         $io->success('Templates up to date.');
 
         return Command::SUCCESS;
+    }
+
+    private function resolveProjectDir(?string $option, ?string $composerExtraProjectDir): string
+    {
+        $projectDir = $option
+            ?? $composerExtraProjectDir
+            ?? getenv(self::PROJECT_DIR_ENV)
+            ?: getcwd();
+
+        if (!is_string($projectDir) || $projectDir === '') {
+            return getcwd();
+        }
+
+        return rtrim($projectDir, '/');
+    }
+
+    private function resolveProjectDirFromComposerExtra(string $projectDir): ?string
+    {
+        $composerPath = $projectDir . '/' . self::COMPOSER_FILE;
+
+        if (!is_file($composerPath)) {
+            return null;
+        }
+
+        $composerContent = file_get_contents($composerPath);
+
+        if (!is_string($composerContent)) {
+            return null;
+        }
+
+        try {
+            $composerData = json_decode($composerContent, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return null;
+        }
+
+        if (!is_array($composerData)) {
+            return null;
+        }
+
+        $extra = $composerData['extra'] ?? null;
+
+        if (!is_array($extra)) {
+            return null;
+        }
+
+        $projectDir = $extra[self::COMPOSER_EXTRA_PROJECT_DIR_KEY] ?? null;
+
+        if (!is_string($projectDir) || $projectDir === '') {
+            return null;
+        }
+
+        return $projectDir;
     }
 
     private function resolveLocale(?string $option, ?string $composerExtraLocale): string

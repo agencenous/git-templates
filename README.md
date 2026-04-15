@@ -24,6 +24,15 @@ vendor/bin/gitlab-templates
 
 Templates are createed in `.gitlab/issue_templates/`.
 
+### Project Directory
+
+The target project directory is defined in this order:
+
+1. Option `--project-dir` / `-d`
+2. `composer.json` key `extra.git-templates-project-dir`
+3. Environment variable `PROJECT_DIR`
+4. Default : current directory
+
 ### Repository Type
 
 The repository type is defined in this order:
@@ -98,7 +107,7 @@ Via composer.json
 
 | Option | Alias | Description |
 |---|---|---|
-| `--project-dir` | `-d` | Root path of the project (default : current directory) |
+| `--project-dir` | `-d` | Root path of the project (default : `extra.git-templates-project-dir`, then `PROJECT_DIR`, then current directory) |
 | `--repository-type` | `-r` | Repository type to use (default : `extra.git-templates-repository-type`, then `REPOSITORY_TYPE`, then `gitlab`) |
 | `--locale` | `-l` | Locale to use (default : `extra.git-templates-locale`, then `LANGUAGE`, then `en_US`) |
 
